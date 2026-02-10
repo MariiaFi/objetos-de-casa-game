@@ -1,578 +1,266 @@
-"use strict";
-
-/**
- * ВАЖНО:
- * - Эмодзи разрешены только на welcome-экране (в index.html).
- * - В этом файле и UI после старта НЕ используем эмодзи.
- */
-
-/* ------------------------- Data (50+ words) ------------------------- */
-const WORDS = [
-  // Cocina
-  { id:"cocina_nevera", category:"cocina", es:"nevera", ru:"холодильник" },
-  { id:"cocina_congelador", category:"cocina", es:"congelador", ru:"морозилка" },
-  { id:"cocina_horno", category:"cocina", es:"horno", ru:"духовка" },
-  { id:"cocina_microondas", category:"cocina", es:"microondas", ru:"микроволновка" },
-  { id:"cocina_cocina", category:"cocina", es:"cocina", ru:"плита" },
-  { id:"cocina_fogon", category:"cocina", es:"fogón", ru:"конфорка" },
-  { id:"cocina_fregadero", category:"cocina", es:"fregadero", ru:"раковина" },
-  { id:"cocina_grifo", category:"cocina", es:"grifo", ru:"кран" },
-  { id:"cocina_mesa", category:"cocina", es:"mesa", ru:"стол" },
-  { id:"cocina_silla", category:"cocina", es:"silla", ru:"стул" },
-  { id:"cocina_armario", category:"cocina", es:"armario", ru:"шкаф (кухонный)" },
-  { id:"cocina_cajon", category:"cocina", es:"cajón", ru:"ящик" },
-  { id:"cocina_sarten", category:"cocina", es:"sartén", ru:"сковорода" },
-  { id:"cocina_olla", category:"cocina", es:"olla", ru:"кастрюля" },
-  { id:"cocina_cuchillo", category:"cocina", es:"cuchillo", ru:"нож" },
-  { id:"cocina_tenedor", category:"cocina", es:"tenedor", ru:"вилка" },
-  { id:"cocina_cuchara", category:"cocina", es:"cuchara", ru:"ложка" },
-  { id:"cocina_plato", category:"cocina", es:"plato", ru:"тарелка" },
-  { id:"cocina_vaso", category:"cocina", es:"vaso", ru:"стакан" },
-  { id:"cocina_taza", category:"cocina", es:"taza", ru:"чашка" },
-  { id:"cocina_tabla_cortar", category:"cocina", es:"tabla de cortar", ru:"разделочная доска" },
-
-  // Salón
-  { id:"salon_sofa", category:"salon", es:"sofá", ru:"диван" },
-  { id:"salon_sillon", category:"salon", es:"sillón", ru:"кресло" },
-  { id:"salon_mesa_centro", category:"salon", es:"mesa de centro", ru:"журнальный столик" },
-  { id:"salon_estanteria", category:"salon", es:"estantería", ru:"стеллаж/полка" },
-  { id:"salon_televisor", category:"salon", es:"televisor", ru:"телевизор" },
-  { id:"salon_mando", category:"salon", es:"mando a distancia", ru:"пульт" },
-  { id:"salon_lampara", category:"salon", es:"lámpara", ru:"лампа" },
-  { id:"salon_alfombra", category:"salon", es:"alfombra", ru:"ковёр" },
-  { id:"salon_cortinas", category:"salon", es:"cortinas", ru:"шторы" },
-  { id:"salon_cojin", category:"salon", es:"cojín", ru:"диванная подушка" },
-  { id:"salon_cuadro", category:"salon", es:"cuadro", ru:"картина" },
-  { id:"salon_reloj", category:"salon", es:"reloj", ru:"часы" },
-  { id:"salon_planta", category:"salon", es:"planta", ru:"растение" },
-
-  // Dormitorio
-  { id:"dormitorio_cama", category:"dormitorio", es:"cama", ru:"кровать" },
-  { id:"dormitorio_colchon", category:"dormitorio", es:"colchón", ru:"матрас" },
-  { id:"dormitorio_almohada", category:"dormitorio", es:"almohada", ru:"подушка" },
-  { id:"dormitorio_manta", category:"dormitorio", es:"manta", ru:"плед/одеяло" },
-  { id:"dormitorio_sabanas", category:"dormitorio", es:"sábanas", ru:"простыни" },
-  { id:"dormitorio_armario", category:"dormitorio", es:"armario", ru:"шкаф" },
-  { id:"dormitorio_percha", category:"dormitorio", es:"percha", ru:"вешалка" },
-  { id:"dormitorio_mesita", category:"dormitorio", es:"mesita de noche", ru:"тумбочка" },
-  { id:"dormitorio_lampara_noche", category:"dormitorio", es:"lámpara de noche", ru:"ночник" },
-  { id:"dormitorio_espejo", category:"dormitorio", es:"espejo", ru:"зеркало" },
-
-  // Baño
-  { id:"bano_ducha", category:"bano", es:"ducha", ru:"душ" },
-  { id:"bano_banera", category:"bano", es:"bañera", ru:"ванна" },
-  { id:"bano_lavabo", category:"bano", es:"lavabo", ru:"умывальник" },
-  { id:"bano_inodoro", category:"bano", es:"inodoro", ru:"туалет" },
-  { id:"bano_toalla", category:"bano", es:"toalla", ru:"полотенце" },
-  { id:"bano_papel", category:"bano", es:"papel higiénico", ru:"туалетная бумага" },
-  { id:"bano_jabon", category:"bano", es:"jabón", ru:"мыло" },
-  { id:"bano_champu", category:"bano", es:"champú", ru:"шампунь" },
-  { id:"bano_cepillo", category:"bano", es:"cepillo de dientes", ru:"зубная щётка" },
-  { id:"bano_pasta", category:"bano", es:"pasta de dientes", ru:"зубная паста" },
-
-  // Limpieza / Utilidad
-  { id:"util_aspiradora", category:"utilidad", es:"aspiradora", ru:"пылесос" },
-  { id:"util_escoba", category:"utilidad", es:"escoba", ru:"метла" },
-  { id:"util_recogedor", category:"utilidad", es:"recogedor", ru:"совок" },
-  { id:"util_fregona", category:"utilidad", es:"fregona", ru:"швабра" },
-  { id:"util_cubo", category:"utilidad", es:"cubo", ru:"ведро" },
-  { id:"util_detergente", category:"utilidad", es:"detergente", ru:"моющее средство" },
-  { id:"util_esponja", category:"utilidad", es:"esponja", ru:"губка" },
-  { id:"util_trapo", category:"utilidad", es:"trapo", ru:"тряпка" },
-  { id:"util_plancha", category:"utilidad", es:"plancha", ru:"утюг" },
-  { id:"util_tabla_planchar", category:"utilidad", es:"tabla de planchar", ru:"гладильная доска" }
-];
-
-const CATEGORIES = [
-  { key:"all", label:"Все" },
-  { key:"cocina", label:"Cocina" },
-  { key:"salon", label:"Salón" },
-  { key:"dormitorio", label:"Dormitorio" },
-  { key:"bano", label:"Baño" },
-  { key:"utilidad", label:"Limpieza / Utilidad" }
-];
-
-/* ------------------------- Storage ------------------------- */
-const STORAGE_KEY = "objetos_casa_es_v1";
-
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(e){
-    return null;
-  }
+:root{
+  --bg: #0f1220;
+  --panel: #151a2d;
+  --panel2:#101428;
+  --text: #e7e9f3;
+  --muted:#aab0c6;
+  --line: rgba(255,255,255,.10);
+  --btn:#232a44;
+  --btn2:#2c3454;
+  --good:#1f6f4a;
+  --bad:#7a2a2a;
+  --accent:#3b82f6;
 }
 
-function saveState(state){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 30% 10%, #1a2150 0%, var(--bg) 55%);
+  color:var(--text);
 }
 
-function defaultState(){
-  return {
-    mode: "flashcards",
-    dir: "es_ru",
-    category: "all",
-    flashcards: {
-      index: 0,
-      order: []
-    },
-    quiz: {
-      qCount: 0,
-      correct: 0,
-      streak: 0,
-      bestStreak: 0,
-      lastQuestionId: null
-    },
-    stats: {
-      // per word:
-      // { known:0|1, correct: n, wrong:n }
-      perWord: {}
-    }
-  };
+.hidden{ display:none !important; }
+
+.btn{
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, var(--btn2), var(--btn));
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+.btn:hover{ filter:brightness(1.06); }
+.btn:active{ transform: translateY(1px); }
+.btn.primary{ border-color: rgba(59,130,246,.45); }
+.btn.success{ border-color: rgba(31,111,74,.55); }
+.btn.danger{ border-color: rgba(122,42,42,.6); }
+
+.select{
+  width:100%;
+  padding:10px 10px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background: var(--panel2);
+  color:var(--text);
 }
 
-/* ------------------------- Utils ------------------------- */
-function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+.field{ display:flex; flex-direction:column; gap:6px; min-width: 170px; }
+.field-label{ font-size:12px; color:var(--muted); }
 
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+.welcome{
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.welcome-card{
+  width:min(680px, 100%);
+  background: rgba(21,26,45,.9);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+.welcome-badge{ font-size:40px; letter-spacing: 6px; }
+.welcome-title{ margin:10px 0 6px; font-size:28px; }
+.welcome-text{ margin:0 0 16px; color:var(--muted); line-height:1.45; }
+.welcome-footnote{ margin:14px 0 0; color:var(--muted); font-size:12px; }
+
+.app{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
-function pickRandom(arr, excludeSet = new Set()){
-  const candidates = arr.filter(x => !excludeSet.has(x));
-  if(candidates.length === 0) return null;
-  return candidates[Math.floor(Math.random()*candidates.length)];
+.topbar{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding:14px 14px 10px;
+  border-bottom:1px solid var(--line);
+  background: rgba(16,20,40,.65);
+  backdrop-filter: blur(6px);
+}
+.brand-title{ font-weight:800; letter-spacing:.2px; }
+.brand-subtitle{ font-size:12px; color:var(--muted); margin-top:3px; }
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:flex-end;
 }
 
-function uniqBy(arr, keyFn){
-  const seen = new Set();
-  const out = [];
-  for(const x of arr){
-    const k = keyFn(x);
-    if(seen.has(k)) continue;
-    seen.add(k);
-    out.push(x);
-  }
-  return out;
+.content{
+  flex:1;
+  padding:14px;
+  display:flex;
+  justify-content:center;
 }
 
-/* ------------------------- SVG placeholders (no emojis) ------------------------- */
-/**
- * Простой генератор SVG по категории/слову.
- * Никаких внешних ассетов.
- */
-function renderVisual(word){
-  const { category, id } = word;
-  // Use a stable "pattern" by hashing id for variety (still no emojis)
-  const h = hashString(id);
-  const variant = h % 4;
+.view{ width:min(760px, 100%); }
 
-  const svg = makeSVG(category, variant);
-  return svg;
+.card{
+  background: rgba(21,26,45,.9);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  box-shadow: 0 14px 50px rgba(0,0,0,.28);
 }
 
-function hashString(s){
-  let h = 0;
-  for(let i=0;i<s.length;i++){
-    h = (h*31 + s.charCodeAt(i)) >>> 0;
-  }
-  return h;
+.card-visual{
+  height:180px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  margin-bottom:12px;
 }
 
-function makeSVG(category, variant){
-  // Basic shapes by category
-  const w = 520, h = 220;
-  const stroke = "rgba(255,255,255,0.22)";
-  const fillA = "rgba(255,255,255,0.06)";
-  const fillB = "rgba(255,255,255,0.10)";
+.card-word{
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:.2px;
+  margin-bottom:8px;
+  text-align:center;
+}
+.card-translation{
+  text-align:center;
+  font-size:18px;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.card-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.spacer{ flex:1; }
 
-  const common = `
-    <rect x="14" y="14" width="${w-28}" height="${h-28}" rx="16" ry="16" fill="${fillA}" stroke="${stroke}" />
-    <path d="M20 ${h-36} Q ${w/2} ${h-10}, ${w-20} ${h-36}" fill="none" stroke="${stroke}" />
-  `;
-
-  let art = "";
-
-  if(category === "cocina"){
-    // abstract "kitchen": blocks + circle
-    art = variant === 0
-      ? `<rect x="70" y="60" width="130" height="90" rx="12" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="220" y="60" width="230" height="40" rx="12" fill="${fillA}" stroke="${stroke}"/>
-         <circle cx="350" cy="135" r="28" fill="${fillB}" stroke="${stroke}"/>`
-      : variant === 1
-      ? `<rect x="90" y="56" width="340" height="108" rx="18" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="115" y="78" width="120" height="62" rx="12" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="255" y="78" width="150" height="26" rx="10" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="255" y="114" width="150" height="26" rx="10" fill="${fillB}" stroke="${stroke}"/>`
-      : variant === 2
-      ? `<rect x="110" y="60" width="300" height="90" rx="16" fill="${fillB}" stroke="${stroke}"/>
-         <path d="M150 150 L150 70" stroke="${stroke}"/>
-         <path d="M370 150 L370 70" stroke="${stroke}"/>
-         <circle cx="260" cy="105" r="22" fill="${fillA}" stroke="${stroke}"/>`
-      : `<rect x="80" y="66" width="160" height="84" rx="16" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="260" y="66" width="180" height="84" rx="16" fill="${fillB}" stroke="${stroke}"/>
-         <path d="M260 108 H440" stroke="${stroke}"/>`;
-  } else if(category === "salon"){
-    // abstract "living room": sofa-like silhouette
-    art = variant === 0
-      ? `<rect x="92" y="90" width="336" height="64" rx="20" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="120" y="70" width="120" height="46" rx="16" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="280" y="70" width="120" height="46" rx="16" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="112" y="152" width="40" height="18" rx="8" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="368" y="152" width="40" height="18" rx="8" fill="${fillA}" stroke="${stroke}"/>`
-      : variant === 1
-      ? `<rect x="110" y="78" width="300" height="90" rx="22" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="130" y="98" width="120" height="50" rx="16" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="270" y="98" width="120" height="50" rx="16" fill="${fillB}" stroke="${stroke}"/>`
-      : variant === 2
-      ? `<rect x="100" y="92" width="320" height="64" rx="20" fill="${fillA}" stroke="${stroke}"/>
-         <path d="M120 92 Q260 40 400 92" fill="none" stroke="${stroke}"/>
-         <rect x="120" y="148" width="44" height="18" rx="8" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="356" y="148" width="44" height="18" rx="8" fill="${fillB}" stroke="${stroke}"/>`
-      : `<rect x="120" y="86" width="280" height="80" rx="22" fill="${fillB}" stroke="${stroke}"/>
-         <circle cx="170" cy="98" r="14" fill="${fillA}" stroke="${stroke}"/>
-         <circle cx="350" cy="98" r="14" fill="${fillA}" stroke="${stroke}"/>`;
-  } else if(category === "dormitorio"){
-    // abstract "bed"
-    art = variant === 0
-      ? `<rect x="90" y="96" width="340" height="62" rx="18" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="110" y="70" width="110" height="46" rx="16" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="228" y="70" width="190" height="28" rx="14" fill="${fillA}" stroke="${stroke}"/>`
-      : variant === 1
-      ? `<rect x="110" y="84" width="300" height="80" rx="20" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="130" y="96" width="120" height="44" rx="16" fill="${fillB}" stroke="${stroke}"/>
-         <path d="M260 96 H390" stroke="${stroke}"/>`
-      : variant === 2
-      ? `<rect x="100" y="104" width="320" height="54" rx="18" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="120" y="78" width="140" height="44" rx="16" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="280" y="78" width="120" height="24" rx="12" fill="${fillB}" stroke="${stroke}"/>`
-      : `<rect x="96" y="96" width="328" height="64" rx="18" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="116" y="74" width="140" height="40" rx="16" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="272" y="74" width="132" height="22" rx="11" fill="${fillA}" stroke="${stroke}"/>`;
-  } else if(category === "bano"){
-    // abstract "bathroom": basin-like
-    art = variant === 0
-      ? `<rect x="150" y="70" width="220" height="38" rx="14" fill="${fillB}" stroke="${stroke}"/>
-         <path d="M170 108 Q260 168 350 108" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="240" y="48" width="40" height="26" rx="10" fill="${fillA}" stroke="${stroke}"/>`
-      : variant === 1
-      ? `<path d="M170 92 Q260 40 350 92" fill="none" stroke="${stroke}"/>
-         <rect x="170" y="92" width="180" height="72" rx="26" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="245" y="60" width="30" height="26" rx="10" fill="${fillB}" stroke="${stroke}"/>`
-      : variant === 2
-      ? `<rect x="160" y="78" width="200" height="26" rx="12" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="190" y="104" width="140" height="56" rx="24" fill="${fillA}" stroke="${stroke}"/>
-         <path d="M210 132 Q260 156 310 132" fill="none" stroke="${stroke}"/>`
-      : `<rect x="168" y="74" width="184" height="30" rx="12" fill="${fillA}" stroke="${stroke}"/>
-         <path d="M182 104 Q260 176 338 104" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="246" y="50" width="28" height="26" rx="10" fill="${fillA}" stroke="${stroke}"/>`;
-  } else {
-    // utilidad
-    art = variant === 0
-      ? `<rect x="130" y="74" width="260" height="92" rx="18" fill="${fillA}" stroke="${stroke}"/>
-         <path d="M160 152 L120 182" stroke="${stroke}"/>
-         <path d="M360 152 L400 182" stroke="${stroke}"/>
-         <circle cx="200" cy="122" r="18" fill="${fillB}" stroke="${stroke}"/>`
-      : variant === 1
-      ? `<rect x="150" y="68" width="220" height="104" rx="18" fill="${fillB}" stroke="${stroke}"/>
-         <path d="M190 78 L330 162" stroke="${stroke}"/>
-         <path d="M330 78 L190 162" stroke="${stroke}"/>`
-      : variant === 2
-      ? `<rect x="120" y="86" width="280" height="80" rx="18" fill="${fillA}" stroke="${stroke}"/>
-         <rect x="140" y="106" width="120" height="40" rx="14" fill="${fillB}" stroke="${stroke}"/>
-         <rect x="280" y="106" width="100" height="40" rx="14" fill="${fillB}" stroke="${stroke}"/>`
-      : `<rect x="160" y="70" width="200" height="96" rx="18" fill="${fillA}" stroke="${stroke}"/>
-         <circle cx="210" cy="118" r="16" fill="${fillB}" stroke="${stroke}"/>
-         <circle cx="310" cy="118" r="16" fill="${fillB}" stroke="${stroke}"/>`;
-  }
-
-  return `
-    <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="">
-      ${common}
-      ${art}
-    </svg>
-  `;
+.card-meta{
+  margin-top:12px;
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
 }
 
-/* ------------------------- App State ------------------------- */
-let state = loadState() || defaultState();
+.quiz-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.quiz-question{ font-weight:800; }
+.quiz-score{ color:var(--muted); font-size:12px; }
 
-/* ------------------------- DOM ------------------------- */
-const elWelcome = document.getElementById("welcome");
-const elApp = document.getElementById("app");
-const btnStart = document.getElementById("btnStart");
+.answers{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.answer{
+  width:100%;
+  text-align:left;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: rgba(16,20,40,.6);
+  cursor:pointer;
+  font-weight:700;
+}
+.answer:hover{ filter:brightness(1.06); }
+.answer.correct{ border-color: rgba(31,111,74,.7); background: rgba(31,111,74,.18); }
+.answer.wrong{ border-color: rgba(122,42,42,.7); background: rgba(122,42,42,.18); }
 
-const modeSelect = document.getElementById("modeSelect");
-const dirSelect = document.getElementById("dirSelect");
-const catSelect = document.getElementById("catSelect");
+.quiz-meta{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+.feedback{ min-height:20px; color:var(--muted); }
 
-const viewFlashcards = document.getElementById("viewFlashcards");
-const viewQuiz = document.getElementById("viewQuiz");
-const viewStats = document.getElementById("viewStats");
+.section-title{ margin:0 0 12px; }
+.section-subtitle{ margin:0 0 6px; }
+.hint{ margin:0 0 12px; color:var(--muted); font-size:12px; }
+.divider{ height:1px; background: var(--line); margin:14px 0; }
 
-const fcVisual = document.getElementById("fcVisual");
-const fcWord = document.getElementById("fcWord");
-const fcTranslation = document.getElementById("fcTranslation");
-const fcMeta = document.getElementById("fcMeta");
-const btnReveal = document.getElementById("btnReveal");
-const btnKnow = document.getElementById("btnKnow");
-const btnDontKnow = document.getElementById("btnDontKnow");
+.stats-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:10px;
+}
+.stat{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  background: rgba(16,20,40,.55);
+}
+.stat-label{ color:var(--muted); font-size:12px; }
+.stat-value{ font-size:22px; font-weight:900; margin-top:6px; }
 
-const quizQuestion = document.getElementById("quizQuestion");
-const quizScore = document.getElementById("quizScore");
-const quizVisual = document.getElementById("quizVisual");
-const answersEl = document.getElementById("answers");
-const quizFeedback = document.getElementById("quizFeedback");
-const btnNextQuiz = document.getElementById("btnNextQuiz");
-
-const statKnown = document.getElementById("statKnown");
-const statAccuracy = document.getElementById("statAccuracy");
-const statStreak = document.getElementById("statStreak");
-const statTotal = document.getElementById("statTotal");
-const hardList = document.getElementById("hardList");
-const btnReset = document.getElementById("btnReset");
-
-const tabs = Array.from(document.querySelectorAll(".tab"));
-
-/* ------------------------- Init ------------------------- */
-function init(){
-  // Populate categories
-  catSelect.innerHTML = "";
-  for(const c of CATEGORIES){
-    const opt = document.createElement("option");
-    opt.value = c.key;
-    opt.textContent = c.label;
-    catSelect.appendChild(opt);
-  }
-
-  // Restore selects
-  modeSelect.value = state.mode;
-  dirSelect.value = state.dir;
-  catSelect.value = state.category;
-
-  // Ensure flashcards order exists for current category
-  ensureFlashcardOrder();
-
-  // Bind
-  btnStart.addEventListener("click", onStart);
-  modeSelect.addEventListener("change", () => setMode(modeSelect.value));
-  dirSelect.addEventListener("change", () => { state.dir = dirSelect.value; save(); render(); });
-  catSelect.addEventListener("change", () => { state.category = catSelect.value; ensureFlashcardOrder(true); save(); render(); });
-
-  btnReveal.addEventListener("click", () => {
-    fcTranslation.classList.toggle("hidden");
-    btnReveal.textContent = fcTranslation.classList.contains("hidden") ? "Показать перевод" : "Скрыть перевод";
-  });
-
-  btnKnow.addEventListener("click", () => onFlashcardAnswer(true));
-  btnDontKnow.addEventListener("click", () => onFlashcardAnswer(false));
-
-  btnNextQuiz.addEventListener("click", nextQuiz);
-
-  tabs.forEach(t => t.addEventListener("click", () => setMode(t.dataset.mode)));
-
-  btnReset.addEventListener("click", resetProgress);
-
-  // If user previously started, open app directly (optional):
-  // We'll require start click each load? Better UX: if any saved state exists, open app.
-  const hasSaved = !!loadState();
-  if(hasSaved){
-    // show app directly; still no emojis in app
-    elWelcome.classList.add("hidden");
-    elApp.classList.remove("hidden");
-  }
-
-  render();
+.hard-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.hard-item{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background: rgba(16,20,40,.55);
+}
+.hard-left{ display:flex; flex-direction:column; gap:2px; }
+.hard-es{ font-weight:900; }
+.hard-ru{ color:var(--muted); font-size:12px; }
+.hard-badge{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:6px 10px;
+  font-weight:900;
+  background: rgba(255,255,255,.05);
 }
 
-function onStart(){
-  elWelcome.classList.add("hidden");
-  elApp.classList.remove("hidden");
-  render();
+.row{ display:flex; justify-content:flex-end; }
+
+.bottombar{
+  display:flex;
+  gap:10px;
+  padding:10px 14px;
+  border-top:1px solid var(--line);
+  background: rgba(16,20,40,.65);
+  backdrop-filter: blur(6px);
+}
+.tab{
+  flex:1;
+  border:1px solid var(--line);
+  background: rgba(21,26,45,.65);
+  color:var(--text);
+  padding:10px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:800;
+}
+.tab.active{
+  border-color: rgba(59,130,246,.55);
+  background: rgba(59,130,246,.12);
 }
 
-/* ------------------------- Filtering ------------------------- */
-function getPool(){
-  if(state.category === "all") return WORDS.slice();
-  return WORDS.filter(w => w.category === state.category);
+@media (min-width: 760px){
+  .answers{ grid-template-columns: 1fr 1fr; }
 }
-
-/* ------------------------- Flashcards ------------------------- */
-function ensureFlashcardOrder(resetIndex = false){
-  const pool = getPool();
-  const ids = pool.map(w => w.id);
-  // if current order missing or category changed, rebuild
-  const current = state.flashcards.order || [];
-  const sameSet = current.length === ids.length && current.every(id => ids.includes(id));
-  if(!sameSet){
-    state.flashcards.order = shuffle(ids);
-    state.flashcards.index = 0;
-  }else if(resetIndex){
-    state.flashcards.index = 0;
-  }
-}
-
-function getCurrentFlashcard(){
-  const pool = getPool();
-  const map = new Map(pool.map(w => [w.id, w]));
-  const order = state.flashcards.order || [];
-  if(order.length === 0){
-    ensureFlashcardOrder();
-  }
-  const idx = clamp(state.flashcards.index, 0, order.length-1);
-  const id = order[idx];
-  return map.get(id) || pool[0];
-}
-
-function onFlashcardAnswer(know){
-  const word = getCurrentFlashcard();
-  ensurePerWord(word.id);
-
-  if(know){
-    state.stats.perWord[word.id].known = 1;
-    // streak as "good actions" too
-    state.quiz.streak = state.quiz.streak + 1;
-    state.quiz.bestStreak = Math.max(state.quiz.bestStreak, state.quiz.streak);
-  }else{
-    state.stats.perWord[word.id].known = state.stats.perWord[word.id].known || 0;
-    state.stats.perWord[word.id].wrong += 1;
-    state.quiz.streak = 0;
-  }
-
-  // next
-  state.flashcards.index = (state.flashcards.index + 1) % state.flashcards.order.length;
-
-  // reset reveal
-  fcTranslation.classList.add("hidden");
-  btnReveal.textContent = "Показать перевод";
-
-  save();
-  renderFlashcards();
-}
-
-/* ------------------------- Quiz ------------------------- */
-let currentQuiz = null; // { word, options[], correctIndex, locked, selectedIndex }
-
-function buildQuizQuestion(){
-  const pool = getPool();
-  const dir = state.dir;
-
-  // Avoid repeating same question twice if possible
-  const exclude = new Set();
-  if(state.quiz.lastQuestionId) exclude.add(state.quiz.lastQuestionId);
-
-  let word = null;
-  if(pool.length > 1){
-    const candidates = pool.filter(w => !exclude.has(w.id));
-    word = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : pool[Math.floor(Math.random()*pool.length)];
-  }else{
-    word = pool[0];
-  }
-
-  // Build options: correct + 3 distractors from same category if possible
-  const sameCat = WORDS.filter(w => w.category === word.category && w.id !== word.id);
-  const baseDistractors = sameCat.length >= 3 ? sameCat : WORDS.filter(w => w.id !== word.id);
-  const distractors = shuffle(baseDistractors).slice(0, 3);
-
-  const all = shuffle([word, ...distractors]);
-
-  const getLabel = (w) => (dir === "es_ru" ? w.es : w.ru);
-  const options = all.map(getLabel);
-  const correctIndex = all.findIndex(w => w.id === word.id);
-
-  return { word, options, correctIndex };
-}
-
-function renderQuiz(){
-  if(!currentQuiz){
-    currentQuiz = buildQuizQuestion();
-    state.quiz.lastQuestionId = currentQuiz.word.id;
-    save();
-  }
-
-  quizQuestion.textContent = "¿Cómo se llama esto?";
-  quizVisual.innerHTML = renderVisual(currentQuiz.word);
-
-  // score line
-  quizScore.textContent = `${state.quiz.correct} / ${state.quiz.qCount}`;
-
-  answersEl.innerHTML = "";
-  quizFeedback.textContent = "";
-  btnNextQuiz.disabled = true;
-
-  currentQuiz.locked = false;
-  currentQuiz.selectedIndex = null;
-
-  currentQuiz.options.forEach((text, idx) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "answer";
-    btn.textContent = text; // no emojis here
-    btn.addEventListener("click", () => selectAnswer(idx, btn));
-    answersEl.appendChild(btn);
-  });
-}
-
-function ensurePerWord(wordId){
-  if(!state.stats.perWord[wordId]){
-    state.stats.perWord[wordId] = { known:0, correct:0, wrong:0 };
-  }
-}
-
-function selectAnswer(idx){
-  if(!currentQuiz || currentQuiz.locked) return;
-
-  currentQuiz.locked = true;
-  currentQuiz.selectedIndex = idx;
-
-  const word = currentQuiz.word;
-  ensurePerWord(word.id);
-
-  const nodes = Array.from(answersEl.querySelectorAll(".answer"));
-  nodes.forEach((n, i) => {
-    if(i === currentQuiz.correctIndex) n.classList.add("correct");
-    if(i === idx && idx !== currentQuiz.correctIndex) n.classList.add("wrong");
-    n.disabled = true;
-  });
-
-  state.quiz.qCount += 1;
-
-  if(idx === currentQuiz.correctIndex){
-    state.quiz.correct += 1;
-    state.quiz.streak += 1;
-    state.quiz.bestStreak = Math.max(state.quiz.bestStreak, state.quiz.streak);
-    state.stats.perWord[word.id].correct += 1;
-    quizFeedback.textContent = "Верно.";
-  }else{
-    state.quiz.streak = 0;
-    state.stats.perWord[word.id].wrong += 1;
-    quizFeedback.textContent = "Неверно.";
-  }
-
-  btnNextQuiz.disabled = false;
-  save();
-  // update score immediately
-  quizScore.textContent = `${state.quiz.correct} / ${state.quiz.qCount}`;
-}
-
-function nextQuiz(){
-  currentQuiz = buildQuizQuestion();
-  state.quiz.lastQuestionId = currentQuiz.word.id;
-  save();
-  renderQuiz();
-}
-
-/* ------------------------- Stats ------------------------- */
-function computeStats(){
-  const perWord = state.stats.perWord || {};
-  const entries = Object.entries(perWord);
-
-  let known = 0;
-  let correct
