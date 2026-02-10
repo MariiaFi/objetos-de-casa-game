@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objetos de Casa - Aprende Español</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Objetos de Casa</h1>
+            <p class="subtitle">Aprende palabras en español sobre objetos domésticos</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="mode">Modo:</label>
+                    <select id="mode">
+                        <option value="flashcards">Tarjetas (Flashcards)</option>
+                        <option value="quiz">Quiz (Preguntas)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="direction">Dirección:</label>
+                    <select id="direction">
+                        <option value="es-ru">ES → RU (Español → Ruso)</option>
+                        <option value="ru-es">RU → ES (Ruso → Español)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="category">Categoría:</label>
+                    <select id="category">
+                        <option value="all">Todas las categorías</option>
+                        <option value="cocina">Cocina</option>
+                        <option value="salon">Salón</option>
+                        <option value="dormitorio">Dormitorio</option>
+                        <option value="bano">Baño</option>
+                        <option value="limpieza">Limpieza / Utilidad</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <div id="flashcards-mode" class="game-mode active">
+                <div class="card">
+                    <div class="card-emoji" id="card-emoji">🏠</div>
+                    <div class="card-word" id="card-word">...</div>
+                    <div class="card-translation hidden" id="card-translation">...</div>
+                    
+                    <div class="card-controls">
+                        <button id="show-translation-btn" class="btn btn-secondary">Mostrar traducción</button>
+                        
+                        <div class="card-feedback">
+                            <button id="know-btn" class="btn btn-success">✓ Lo sé</button>
+                            <button id="dont-know-btn" class="btn btn-error">✗ No sé</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-info">
+                    <p>Progreso: <span id="progress-text">0/0</span></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="quiz-mode" class="game-mode hidden">
+                <div class="quiz-question">
+                    <div class="quiz-emoji" id="quiz-emoji">🏠</div>
+                    <h3 id="quiz-question">¿Cómo se llama esto?</h3>
+                </div>
+                
+                <div class="quiz-options" id="quiz-options">
+                    <!-- Las opciones se generan dinámicamente -->
+                </div>
+                
+                <div class="quiz-feedback hidden" id="quiz-feedback">
+                    <p id="feedback-text"></p>
+                    <button id="next-quiz-btn" class="btn btn-primary">Siguiente</button>
+                </div>
+                
+                <div class="quiz-stats">
+                    <div class="stat">
+                        <span class="stat-label">Correctas:</span>
+                        <span id="correct-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Racha actual:</span>
+                        <span id="current-streak" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Precisión:</span>
+                        <span id="accuracy" class="stat-value">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="stats-mode" class="game-mode hidden">
+                <h2>Estadísticas</h2>
+                
+                <div class="stats-overview">
+                    <div class="stat-box">
+                        <h3>Progreso Total</h3>
+                        <p class="stat-number" id="total-words">0/50</p>
+                        <p>Palabras practicadas</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Precisión</h3>
+                        <p class="stat-number" id="total-accuracy">0%</p>
+                        <p>Respuestas correctas</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Mejor Racha</h3>
+                        <p class="stat-number" id="best-streak">0</p>
+                        <p>Respuestas seguidas</p>
+                    </div>
+                </div>
+                
+                <h3>Palabras Difíciles</h3>
+                <p id="difficult-words-empty" class="empty-state">¡Todavía no tienes palabras difíciles! Sigue practicando.</p>
+                <ul id="difficult-words-list" class="difficult-words-list">
+                    <!-- Las palabras difíciles se generan dinámicamente -->
+                </ul>
+                
+                <div class="stats-controls">
+                    <button id="reset-stats-btn" class="btn btn-error">Reiniciar estadísticas</button>
+                    <button id="export-stats-btn" class="btn btn-secondary">Exportar datos</button>
+                </div>
+            </div>
+        </main>
+        
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="flashcards-mode">Tarjetas</button>
+            <button class="tab-btn" data-tab="quiz-mode">Quiz</button>
+            <button class="tab-btn" data-tab="stats-mode">Estadísticas</button>
+        </nav>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
