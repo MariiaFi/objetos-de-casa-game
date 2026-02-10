@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏠 Objetos de Casa</h1>
+            <h1>Objetos de Casa</h1>
             <p class="subtitle">Aprende palabras en español sobre objetos domésticos</p>
             
             <div class="controls">
@@ -47,12 +47,14 @@
         <main>
             <div id="flashcards-mode" class="game-mode active">
                 <div class="card">
-                    <div class="card-emoji" id="card-emoji">🏠</div>
+                    <div class="question-hint" id="question-hint">¿En qué habitación se encuentra?</div>
                     <div class="card-word" id="card-word">...</div>
                     <div class="card-translation hidden" id="card-translation">...</div>
+                    <div class="additional-hint hidden" id="additional-hint">...</div>
                     
                     <div class="card-controls">
                         <button id="show-translation-btn" class="btn btn-secondary">Mostrar traducción</button>
+                        <button id="show-hint-btn" class="btn btn-hint">Mostrar pista</button>
                         
                         <div class="card-feedback">
                             <button id="know-btn" class="btn btn-success">✓ Lo sé</button>
@@ -71,7 +73,7 @@
             
             <div id="quiz-mode" class="game-mode hidden">
                 <div class="quiz-question">
-                    <div class="quiz-emoji" id="quiz-emoji">🏠</div>
+                    <div class="question-hint" id="quiz-question-hint">Pista sobre el objeto:</div>
                     <h3 id="quiz-question">¿Cómo se llama esto?</h3>
                 </div>
                 
@@ -81,6 +83,7 @@
                 
                 <div class="quiz-feedback hidden" id="quiz-feedback">
                     <p id="feedback-text"></p>
+                    <div class="hint-explanation" id="hint-explanation"></div>
                     <button id="next-quiz-btn" class="btn btn-primary">Siguiente</button>
                 </div>
                 
