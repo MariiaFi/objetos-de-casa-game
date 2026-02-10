@@ -1,149 +1,144 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Objetos de Casa - Aprende Español</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Objetos de casa — Español</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Objetos de Casa</h1>
-            <p class="subtitle">Aprende palabras en español sobre objetos domésticos</p>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <label for="mode">Modo:</label>
-                    <select id="mode">
-                        <option value="flashcards">Tarjetas (Flashcards)</option>
-                        <option value="quiz">Quiz (Preguntas)</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="direction">Dirección:</label>
-                    <select id="direction">
-                        <option value="es-ru">ES → RU (Español → Ruso)</option>
-                        <option value="ru-es">RU → ES (Ruso → Español)</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="category">Categoría:</label>
-                    <select id="category">
-                        <option value="all">Todas las categorías</option>
-                        <option value="cocina">Cocina</option>
-                        <option value="salon">Salón</option>
-                        <option value="dormitorio">Dormitorio</option>
-                        <option value="bano">Baño</option>
-                        <option value="limpieza">Limpieza / Utilidad</option>
-                    </select>
-                </div>
-            </div>
-        </header>
-        
-        <main>
-            <div id="flashcards-mode" class="game-mode active">
-                <div class="card">
-                    <div class="question-hint" id="question-hint">¿En qué habitación se encuentra?</div>
-                    <div class="card-word" id="card-word">...</div>
-                    <div class="card-translation hidden" id="card-translation">...</div>
-                    <div class="additional-hint hidden" id="additional-hint">...</div>
-                    
-                    <div class="card-controls">
-                        <button id="show-translation-btn" class="btn btn-secondary">Mostrar traducción</button>
-                        <button id="show-hint-btn" class="btn btn-hint">Mostrar pista</button>
-                        
-                        <div class="card-feedback">
-                            <button id="know-btn" class="btn btn-success">✓ Lo sé</button>
-                            <button id="dont-know-btn" class="btn btn-error">✗ No sé</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="progress-info">
-                    <p>Progreso: <span id="progress-text">0/0</span></p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="quiz-mode" class="game-mode hidden">
-                <div class="quiz-question">
-                    <div class="question-hint" id="quiz-question-hint">Pista sobre el objeto:</div>
-                    <h3 id="quiz-question">¿Cómo se llama esto?</h3>
-                </div>
-                
-                <div class="quiz-options" id="quiz-options">
-                    <!-- Las opciones se generan dinámicamente -->
-                </div>
-                
-                <div class="quiz-feedback hidden" id="quiz-feedback">
-                    <p id="feedback-text"></p>
-                    <div class="hint-explanation" id="hint-explanation"></div>
-                    <button id="next-quiz-btn" class="btn btn-primary">Siguiente</button>
-                </div>
-                
-                <div class="quiz-stats">
-                    <div class="stat">
-                        <span class="stat-label">Correctas:</span>
-                        <span id="correct-count" class="stat-value">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Racha actual:</span>
-                        <span id="current-streak" class="stat-value">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Precisión:</span>
-                        <span id="accuracy" class="stat-value">0%</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="stats-mode" class="game-mode hidden">
-                <h2>Estadísticas</h2>
-                
-                <div class="stats-overview">
-                    <div class="stat-box">
-                        <h3>Progreso Total</h3>
-                        <p class="stat-number" id="total-words">0/50</p>
-                        <p>Palabras practicadas</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>Precisión</h3>
-                        <p class="stat-number" id="total-accuracy">0%</p>
-                        <p>Respuestas correctas</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>Mejor Racha</h3>
-                        <p class="stat-number" id="best-streak">0</p>
-                        <p>Respuestas seguidas</p>
-                    </div>
-                </div>
-                
-                <h3>Palabras Difíciles</h3>
-                <p id="difficult-words-empty" class="empty-state">¡Todavía no tienes palabras difíciles! Sigue practicando.</p>
-                <ul id="difficult-words-list" class="difficult-words-list">
-                    <!-- Las palabras difíciles se generan dinámicamente -->
-                </ul>
-                
-                <div class="stats-controls">
-                    <button id="reset-stats-btn" class="btn btn-error">Reiniciar estadísticas</button>
-                    <button id="export-stats-btn" class="btn btn-secondary">Exportar datos</button>
-                </div>
-            </div>
-        </main>
-        
-        <nav class="tabs">
-            <button class="tab-btn active" data-tab="flashcards-mode">Tarjetas</button>
-            <button class="tab-btn" data-tab="quiz-mode">Quiz</button>
-            <button class="tab-btn" data-tab="stats-mode">Estadísticas</button>
-        </nav>
+  <!-- WELCOME (эмодзи разрешены ТОЛЬКО тут) -->
+  <section id="welcome" class="welcome" aria-label="Welcome screen">
+    <div class="welcome-card">
+      <div class="welcome-badge">🏠🛋️🛁🍽️</div>
+      <h1 class="welcome-title">Objetos de casa — Español</h1>
+      <p class="welcome-text">
+        Учим предметы дома на испанском: карточки + квиз, прогресс сохраняется.
+      </p>
+      <button id="btnStart" class="btn primary" type="button">Начать</button>
+      <p class="welcome-footnote">
+        Эмодзи остаются на этом экране. Дальше — чистый учебный режим.
+      </p>
     </div>
-    
-    <script src="app.js"></script>
+  </section>
+
+  <!-- APP (эмодзи ЗАПРЕЩЕНЫ в этом блоке) -->
+  <main id="app" class="app hidden" aria-label="Learning app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">Objetos de casa</div>
+        <div class="brand-subtitle">Español ↔ Русский</div>
+      </div>
+
+      <div class="controls">
+        <label class="field">
+          <span class="field-label">Режим</span>
+          <select id="modeSelect" class="select">
+            <option value="flashcards">Карточки</option>
+            <option value="quiz">Квиз</option>
+            <option value="stats">Статистика</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Направление</span>
+          <select id="dirSelect" class="select">
+            <option value="es_ru">ES → RU</option>
+            <option value="ru_es">RU → ES</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Категория</span>
+          <select id="catSelect" class="select"></select>
+        </label>
+      </div>
+    </header>
+
+    <section class="content">
+      <!-- Flashcards -->
+      <section id="viewFlashcards" class="view">
+        <div class="card">
+          <div class="card-visual" id="fcVisual" aria-hidden="true"></div>
+          <div class="card-word" id="fcWord">...</div>
+          <div class="card-translation hidden" id="fcTranslation">...</div>
+
+          <div class="card-actions">
+            <button id="btnReveal" class="btn" type="button">Показать перевод</button>
+            <div class="spacer"></div>
+            <button id="btnKnow" class="btn success" type="button">Знаю</button>
+            <button id="btnDontKnow" class="btn danger" type="button">Не знаю</button>
+          </div>
+
+          <div class="card-meta" id="fcMeta">Слово 0 из 0</div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section id="viewQuiz" class="view hidden">
+        <div class="card">
+          <div class="quiz-header">
+            <div class="quiz-question" id="quizQuestion">¿Cómo se llama esto?</div>
+            <div class="quiz-score" id="quizScore">0 / 0</div>
+          </div>
+
+          <div class="card-visual" id="quizVisual" aria-hidden="true"></div>
+
+          <div class="answers" id="answers"></div>
+
+          <div class="quiz-meta">
+            <div id="quizFeedback" class="feedback" role="status" aria-live="polite"></div>
+            <button id="btnNextQuiz" class="btn primary" type="button">Дальше</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section id="viewStats" class="view hidden">
+        <div class="card">
+          <h2 class="section-title">Статистика</h2>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="stat-label">Изучено (знаю)</div>
+              <div class="stat-value" id="statKnown">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Точность</div>
+              <div class="stat-value" id="statAccuracy">0%</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Серия</div>
+              <div class="stat-value" id="statStreak">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Ответов всего</div>
+              <div class="stat-value" id="statTotal">0</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-subtitle">Сложные слова</h3>
+          <p class="hint">Это слова с наибольшим числом ошибок.</p>
+          <div id="hardList" class="hard-list"></div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button id="btnReset" class="btn danger" type="button">Сбросить прогресс</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="bottombar">
+      <button class="tab" data-mode="flashcards" type="button">Карточки</button>
+      <button class="tab" data-mode="quiz" type="button">Квиз</button>
+      <button class="tab" data-mode="stats" type="button">Статистика</button>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
