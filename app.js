@@ -1,128 +1,149 @@
-// ===== DATA =====
-const vocabulary = [
-  { id:1, category:'cocina', hint:'¿Qué enfría la comida?', additionalHint:'Es grande y blanco.', es:'nevera', ru:'холодильник' },
-  { id:2, category:'cocina', hint:'¿Dónde se fríe comida?', additionalHint:'Tiene mango.', es:'sartén', ru:'сковорода' },
-  { id:3, category:'salon', hint:'¿Dónde te sientas?', additionalHint:'Es blando.', es:'sofá', ru:'диван' },
-  { id:4, category:'bano', hint:'¿Dónde te duchas?', additionalHint:'Tiene agua caliente.', es:'ducha', ru:'душ' },
-  { id:5, category:'limpieza', hint:'¿Qué aspira polvo?', additionalHint:'Hace ruido.', es:'aspiradora', ru:'пылесос' }
-];
+document.addEventListener("DOMContentLoaded", () => {
 
-// ===== STATE =====
-const state = {
-  mode: 'flashcards',
-  direction: 'es-ru',
-  category: 'all',
-  currentWord: null
-};
+  // ===== WELCOME =====
+  const welcome = document.getElementById("welcome");
+  const app = document.getElementById("app");
+  const startBtn = document.getElementById("start-btn");
 
-// ===== HELPERS =====
-function filteredWords() {
-  return state.category === 'all'
-    ? vocabulary
-    : vocabulary.filter(w => w.category === state.category);
-}
-
-function randomWord() {
-  const list = filteredWords();
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-// ===== FLASHCARDS =====
-function showFlashcard() {
-  const word = randomWord();
-  state.currentWord = word;
-
-  questionHint.textContent = word.hint;
-  additionalHint.textContent = word.additionalHint;
-  additionalHint.classList.add('hidden');
-
-  if (state.direction === 'es-ru') {
-    cardWord.textContent = word.es;
-    cardTranslation.textContent = word.ru;
-  } else {
-    cardWord.textContent = word.ru;
-    cardTranslation.textContent = word.es;
-  }
-
-  cardTranslation.classList.add('hidden');
-}
-
-// ===== QUIZ =====
-function showQuiz() {
-  const word = randomWord();
-  state.currentWord = word;
-
-  quizQuestionHint.textContent = word.hint;
-  quizOptions.innerHTML = '';
-
-  const options = [...filteredWords()]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3)
-    .concat(word)
-    .sort(() => Math.random() - 0.5);
-
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.textContent = state.direction === 'es-ru' ? opt.es : opt.ru;
-    btn.onclick = () => checkAnswer(opt.id === word.id);
-    quizOptions.appendChild(btn);
+  startBtn.addEventListener("click", () => {
+    welcome.classList.add("hidden");
+    app.classList.remove("hidden");
+    showFlashcard();
   });
 
-  quizFeedback.classList.add('hidden');
-}
+  // ===== DATA =====
+  const words = [
+    { category:"cocina", es:"nevera", ru:"холодильник", hint:"¿Qué enfría la comida?", extra:"Es grande y blanco." },
+    { category:"cocina", es:"sartén", ru:"сковорода", hint:"¿Dónde se fríe comida?", extra:"Tiene mango." },
+    { category:"salon", es:"sofá", ru:"диван", hint:"¿Dónde te sientas?", extra:"Es blando." },
+    { category:"bano", es:"ducha", ru:"душ", hint:"¿Dónde te lavas?", extra:"Tiene agua caliente." },
+    { category:"limpieza", es:"aspiradora", ru:"пылесос", hint:"¿Qué aspira polvo?", extra:"Hace ruido." }
+  ];
 
-function checkAnswer(correct) {
-  quizFeedback.textContent = correct
-    ? 'Верно ✅'
-    : `Неверно ❌ Правильно: ${state.currentWord.es} — ${state.currentWord.ru}`;
-  quizFeedback.classList.remove('hidden');
-}
+  const state = {
+    mode: "flashcards",
+    direction: "es-ru",
+    category: "all",
+    current: null
+  };
 
-// ===== UI =====
-const modeSelect = document.getElementById('mode');
-const directionSelect = document.getElementById('direction');
-const categorySelect = document.getElementById('category');
+  // ===== ELEMENTS =====
+  const modeSelect = document.getElementById("mode");
+  const directionSelect = document.getElementById("direction");
+  const categorySelect = document.getElementById("category");
 
-const flashcardsView = document.getElementById('flashcards');
-const quizView = document.getElementById('quiz');
+  const flashcardsView = document.getElementById("flashcards");
+  const quizView = document.getElementById("quiz");
 
-const questionHint = document.getElementById('question-hint');
-const additionalHint = document.getElementById('additional-hint');
-const cardWord = document.getElementById('card-word');
-const cardTranslation = document.getElementById('card-translation');
+  const hintEl = document.getElementById("hint");
+  const wordEl = document.getElementById("word");
+  const translationEl = document.getElementById("translation");
+  const extraHintEl = document.getElementById("extra-hint");
 
-const quizQuestionHint = document.getElementById('quiz-question-hint');
-const quizOptions = document.getElementById('quiz-options');
-const quizFeedback = document.getElementById('quiz-feedback');
+  const quizHintEl = document.getElementById("quiz-hint");
+  const quizOptionsEl = document.getElementById("quiz-options");
+  const quizFeedbackEl = document.getElementById("quiz-feedback");
 
-// Buttons
-document.getElementById('show-translation-btn').onclick = () =>
-  cardTranslation.classList.toggle('hidden');
+  // Buttons
+  const btnShowTranslation = document.getElementById("show-translation");
+  const btnShowHint = document.getElementById("show-hint");
+  const btnKnow = document.getElementById("know");
+  const btnDontKnow = document.getElementById("dont-know");
+  const btnNextQuestion = document.getElementById("next-question");
 
-document.getElementById('show-hint-btn').onclick = () =>
-  additionalHint.classList.remove('hidden');
+  // ===== HELPERS =====
+  function filteredWords() {
+    return state.category === "all"
+      ? words
+      : words.filter(w => w.category === state.category);
+  }
 
-document.getElementById('know-btn').onclick = showFlashcard;
-document.getElementById('dont-know-btn').onclick = showFlashcard;
-document.getElementById('next-quiz-btn').onclick = showQuiz;
+  function randomWord() {
+    const list = filteredWords();
+    return list[Math.floor(Math.random() * list.length)];
+  }
 
-// Selectors
-modeSelect.onchange = () => {
-  state.mode = modeSelect.value;
-  flashcardsView.classList.toggle('hidden', state.mode !== 'flashcards');
-  quizView.classList.toggle('hidden', state.mode !== 'quiz');
-  state.mode === 'flashcards' ? showFlashcard() : showQuiz();
-};
+  // ===== FLASHCARDS =====
+  function showFlashcard() {
+    const w = randomWord();
+    state.current = w;
 
-directionSelect.onchange = () => {
-  state.direction = directionSelect.value;
-  state.mode === 'flashcards' ? showFlashcard() : showQuiz();
-};
+    hintEl.textContent = w.hint;
+    extraHintEl.textContent = w.extra;
+    extraHintEl.classList.add("hidden");
 
-categorySelect.onchange = () => {
-  state.category = categorySelect.value;
-  state.mode === 'flashcards' ? showFlashcard() : showQuiz();
-};
+    if (state.direction === "es-ru") {
+      wordEl.textContent = w.es;
+      translationEl.textContent = w.ru;
+    } else {
+      wordEl.textContent = w.ru;
+      translationEl.textContent = w.es;
+    }
 
-// INIT
-showFlashcard();
+    translationEl.classList.add("hidden");
+  }
+
+  // ===== QUIZ =====
+  function showQuiz() {
+    const w = randomWord();
+    state.current = w;
+
+    quizHintEl.textContent = w.hint;
+    quizOptionsEl.innerHTML = "";
+    quizFeedbackEl.classList.add("hidden");
+
+    const options = filteredWords()
+      .filter(x => x !== w)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .concat(w)
+      .sort(() => Math.random() - 0.5);
+
+    options.forEach(o => {
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = state.direction === "es-ru" ? o.es : o.ru;
+
+      btn.addEventListener("click", () => {
+        quizFeedbackEl.textContent =
+          o === w ? "Верно" : `Неверно. ${w.es} — ${w.ru}`;
+        quizFeedbackEl.classList.remove("hidden");
+      });
+
+      quizOptionsEl.appendChild(btn);
+    });
+  }
+
+  // ===== EVENTS =====
+  btnShowTranslation.addEventListener("click", () => {
+    translationEl.classList.toggle("hidden");
+  });
+
+  btnShowHint.addEventListener("click", () => {
+    extraHintEl.classList.remove("hidden");
+  });
+
+  btnKnow.addEventListener("click", showFlashcard);
+  btnDontKnow.addEventListener("click", showFlashcard);
+  btnNextQuestion.addEventListener("click", showQuiz);
+
+  modeSelect.addEventListener("change", e => {
+    state.mode = e.target.value;
+    flashcardsView.classList.toggle("hidden", state.mode !== "flashcards");
+    quizView.classList.toggle("hidden", state.mode !== "quiz");
+    state.mode === "flashcards" ? showFlashcard() : showQuiz();
+  });
+
+  directionSelect.addEventListener("change", e => {
+    state.direction = e.target.value;
+    state.mode === "flashcards" ? showFlashcard() : showQuiz();
+  });
+
+  categorySelect.addEventListener("change", e => {
+    state.category = e.target.value;
+    state.mode === "flashcards" ? showFlashcard() : showQuiz();
+  });
+
+  // ===== DEBUG (можно потом убрать) =====
+  console.log("✅ app.js загружен, кнопка «Начать» работает");
+});
