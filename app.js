@@ -252,4 +252,338 @@ function showQuizQuestion() {
     options.forEach(option => {
         const button = document.createElement('button');
         button.className = 'quiz-option';
-        button.textContent = AppState.currentDirection === '
+        button.textContent = AppState.currentDirection === 'es-ru' ? option.es : option.ru;
+        button.dataset.wordId = option.id;
+        button.addEventListener('click', () => checkQuizAnswer(option.id));
+        optionsContainer.appendChild(button);
+    });
+    
+    document.getElementById('quiz-feedback').classList.add('hidden');
+}
+
+// Verificar respuesta en quiz
+function checkQuizAnswer(selectedId) {
+    if (AppState.quiz.answered) return;
+    
+    AppState.quiz.answered = true;
+    const isCorrect = selectedId === AppState.quiz.correctAnswerId;
+    
+    // Actualizar estadísticas
+    updateWordStats(AppState.quiz.currentQuestion.id, isCorrect);
+    AppState.stats.totalPracticed++;
+    
+    if (isCorrect) {
+        AppState.stats.totalCorrect++;
+        AppState.stats.currentStreak++;
+        if (AppState.stats.currentStreak > AppState.stats.bestStreak) {
+            AppState.stats.bestStreak = AppState.stats.currentStreak;
+        }
+    } else {
+        AppState.stats.totalIncorrect++;
+        AppState.stats.currentStreak = 0;
+    }
+    
+    // Marcar palabra como practicada
+    AppState.stats.practicedWords.add(AppState.quiz.currentQuestion.id);
+    
+    // Mostrar retroalimentación
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(option => {
+        option.classList.add('disabled');
+        if (parseInt(option.dataset.wordId) === AppState.quiz.correctAnswerId) {
+            option.classList.add('correct');
+        } else if (parseInt(option.dataset.wordId) === selectedId) {
+            option.classList.add('incorrect');
+        }
+    });
+    
+    const feedbackText = isCorrect 
+        ? `¡Correcto! ${AppState.quiz.currentQuestion.es} significa "${AppState.quiz.currentQuestion.ru}"`
+        : `Incorrecto. La respuesta correcta es: ${AppState.quiz.currentQuestion.es} - "${AppState.quiz.currentQuestion.ru}"`;
+    
+    document.getElementById('feedback-text').textContent = feedbackText;
+    document.getElementById('quiz-feedback').classList.remove('hidden');
+    
+    // Actualizar estadísticas en pantalla
+    updateQuizStats();
+    saveStats();
+}
+
+// Actualizar estadísticas del quiz
+function updateQuizStats() {
+    const accuracy = AppState.stats.totalPracticed > 0 
+        ? Math.round((AppState.stats.totalCorrect / AppState.stats.totalPracticed) * 100) 
+        : 0;
+    
+    document.getElementById('correct-count').textContent = AppState.stats.totalCorrect;
+    document.getElementById('current-streak').textContent = AppState.stats.currentStreak;
+    document.getElementById('accuracy').textContent = `${accuracy}%`;
+}
+
+// Actualizar estadísticas de una palabra
+function updateWordStats(wordId, isCorrect) {
+    if (!AppState.stats.wordStats[wordId]) {
+        AppState.stats.wordStats[wordId] = { correct: 0, incorrect: 0 };
+    }
+    
+    if (isCorrect) {
+        AppState.stats.wordStats[wordId].correct++;
+    } else {
+        AppState.stats.wordStats[wordId].incorrect++;
+    }
+}
+
+// Mostrar estadísticas
+function showStats() {
+    const totalWords = vocabulary.length;
+    const practicedCount = AppState.stats.practicedWords.size;
+    const accuracy = AppState.stats.totalPracticed > 0 
+        ? Math.round((AppState.stats.totalCorrect / AppState.stats.totalPracticed) * 100) 
+        : 0;
+    
+    document.getElementById('total-words').textContent = `${practicedCount}/${totalWords}`;
+    document.getElementById('total-accuracy').textContent = `${accuracy}%`;
+    document.getElementById('best-streak').textContent = AppState.stats.bestStreak;
+    
+    // Mostrar palabras difíciles
+    const difficultWords = getDifficultWords();
+    const difficultWordsList = document.getElementById('difficult-words-list');
+    const emptyState = document.getElementById('difficult-words-empty');
+    
+    difficultWordsList.innerHTML = '';
+    
+    if (difficultWords.length === 0) {
+        emptyState.classList.remove('hidden');
+        difficultWordsList.classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        difficultWordsList.classList.remove('hidden');
+        
+        difficultWords.slice(0, 10).forEach(word => {
+            const stats = AppState.stats.wordStats[word.id] || { correct: 0, incorrect: 0 };
+            const totalAttempts = stats.correct + stats.incorrect;
+            const errorRate = totalAttempts > 0 ? Math.round((stats.incorrect / totalAttempts) * 100) : 0;
+            
+            const li = document.createElement('li');
+            li.className = 'difficult-word-item';
+            li.innerHTML = `
+                <div class="difficult-word-emoji">${word.emoji}</div>
+                <div class="difficult-word-text">
+                    <strong>${word.es}</strong> - ${word.ru}
+                </div>
+                <div class="difficult-word-stats">${errorRate}% error</div>
+            `;
+            difficultWordsList.appendChild(li);
+        });
+    }
+}
+
+// Obtener palabras difíciles (más errores)
+function getDifficultWords() {
+    const wordsWithStats = vocabulary.map(word => {
+        const stats = AppState.stats.wordStats[word.id] || { correct: 0, incorrect: 0 };
+        const totalAttempts = stats.correct + stats.incorrect;
+        const errorRate = totalAttempts > 0 ? stats.incorrect / totalAttempts : 0;
+        
+        return {
+            ...word,
+            errorRate,
+            totalAttempts
+        };
+    });
+    
+    // Filtrar palabras con al menos un intento y ordenar por tasa de error
+    return wordsWithStats
+        .filter(word => word.totalAttempts > 0)
+        .sort((a, b) => b.errorRate - a.errorRate);
+}
+
+// Reiniciar estadísticas
+function resetStats() {
+    if (confirm('¿Estás seguro de que quieres reiniciar todas las estadísticas? Esta acción no se puede deshacer.')) {
+        AppState.stats = {
+            totalPracticed: 0,
+            totalCorrect: 0,
+            totalIncorrect: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            wordStats: {},
+            practicedWords: new Set()
+        };
+        
+        saveStats();
+        showStats();
+        
+        if (AppState.currentMode === 'quiz') {
+            updateQuizStats();
+        } else if (AppState.currentMode === 'flashcards') {
+            updateProgress();
+        }
+        
+        alert('Estadísticas reiniciadas correctamente.');
+    }
+}
+
+// Exportar datos
+function exportStats() {
+    const data = {
+        stats: AppState.stats,
+        vocabulary: vocabulary,
+        exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'objetos-de-casa-stats.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+// Cambiar modo de juego
+function switchMode(mode) {
+    AppState.currentMode = mode;
+    
+    // Ocultar todos los modos
+    document.querySelectorAll('.game-mode').forEach(el => {
+        el.classList.remove('active');
+        el.classList.add('hidden');
+    });
+    
+    // Mostrar modo actual
+    document.getElementById(`${mode}-mode`).classList.remove('hidden');
+    document.getElementById(`${mode}-mode`).classList.add('active');
+    
+    // Actualizar pestañas activas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === `${mode}-mode`) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Actualizar selector
+    document.getElementById('mode').value = mode;
+    
+    // Cargar contenido según modo
+    if (mode === 'flashcards') {
+        showFlashcard();
+    } else if (mode === 'quiz') {
+        showQuizQuestion();
+        updateQuizStats();
+    } else if (mode === 'stats') {
+        showStats();
+    }
+    
+    savePreferences();
+}
+
+// Inicializar la aplicación
+function initApp() {
+    initStorage();
+    
+    // Configurar elementos UI
+    document.getElementById('mode').value = AppState.currentMode;
+    document.getElementById('direction').value = AppState.currentDirection;
+    document.getElementById('category').value = AppState.currentCategory;
+    
+    // Configurar eventos
+    document.getElementById('mode').addEventListener('change', (e) => {
+        switchMode(e.target.value);
+    });
+    
+    document.getElementById('direction').addEventListener('change', (e) => {
+        AppState.currentDirection = e.target.value;
+        savePreferences();
+        
+        if (AppState.currentMode === 'flashcards') {
+            showFlashcard();
+        } else if (AppState.currentMode === 'quiz') {
+            showQuizQuestion();
+        }
+    });
+    
+    document.getElementById('category').addEventListener('change', (e) => {
+        AppState.currentCategory = e.target.value;
+        savePreferences();
+        
+        if (AppState.currentMode === 'flashcards') {
+            showFlashcard();
+        } else if (AppState.currentMode === 'quiz') {
+            showQuizQuestion();
+        } else if (AppState.currentMode === 'stats') {
+            showStats();
+        }
+    });
+    
+    // Botones de flashcards
+    document.getElementById('show-translation-btn').addEventListener('click', () => {
+        document.getElementById('card-translation').classList.remove('hidden');
+    });
+    
+    document.getElementById('know-btn').addEventListener('click', () => {
+        const currentWord = getFilteredVocabulary()[AppState.currentWordIndex];
+        if (currentWord) {
+            updateWordStats(currentWord.id, true);
+            AppState.stats.practicedWords.add(currentWord.id);
+            AppState.stats.totalPracticed++;
+            AppState.stats.totalCorrect++;
+            AppState.stats.currentStreak++;
+            
+            if (AppState.stats.currentStreak > AppState.stats.bestStreak) {
+                AppState.stats.bestStreak = AppState.stats.currentStreak;
+            }
+            
+            saveStats();
+            updateProgress();
+        }
+        showFlashcard();
+    });
+    
+    document.getElementById('dont-know-btn').addEventListener('click', () => {
+        const currentWord = getFilteredVocabulary()[AppState.currentWordIndex];
+        if (currentWord) {
+            updateWordStats(currentWord.id, false);
+            AppState.stats.practicedWords.add(currentWord.id);
+            AppState.stats.totalPracticed++;
+            AppState.stats.totalIncorrect++;
+            AppState.stats.currentStreak = 0;
+            
+            saveStats();
+            updateProgress();
+        }
+        showFlashcard();
+    });
+    
+    // Botones de quiz
+    document.getElementById('next-quiz-btn').addEventListener('click', () => {
+        showQuizQuestion();
+    });
+    
+    // Botones de estadísticas
+    document.getElementById('reset-stats-btn').addEventListener('click', resetStats);
+    document.getElementById('export-stats-btn').addEventListener('click', exportStats);
+    
+    // Pestañas de navegación
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            if (tab === 'stats-mode') {
+                switchMode('stats');
+            } else if (tab === 'quiz-mode') {
+                switchMode('quiz');
+            } else {
+                switchMode('flashcards');
+            }
+        });
+    });
+    
+    // Inicializar primer modo
+    switchMode(AppState.currentMode);
+}
+
+// Iniciar la aplicación cuando se cargue el DOM
+document.addEventListener('DOMContentLoaded', initApp);
